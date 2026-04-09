@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Numeris – Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sidebar-bg: #1a1f2e;
+    --sidebar-hover: #252b3b;
+    --sidebar-active: #2d3447;
+    --sidebar-text: #8b92a8;
+    --sidebar-text-active: #ffffff;
+    --accent: #2d9b8a;
+    --accent-dark: #237a6d;
+    --accent-blue: #4a90d9;
+    --accent-blue-light: #e8f2fb;
+    --red: #e05c3a;
+    --red-light: #fdf1ee;
+    --amber: #d4870e;
+    --amber-light: #fef6e8;
+    --green: #2d9b8a;
+    --green-light: #e8f7f5;
+    --body-bg: #f4f5f8;
+    --card-bg: #ffffff;
+    --text-primary: #1a1f2e;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e8eaef;
+    --border-light: #f0f2f5;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --sidebar-width: 200px;
+    --font: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html, body { height: 100%; font-family: var(--font); background: var(--body-bg); color: var(--text-primary); font-size: 14px; line-height: 1.5; }
+
+  /* ─── LAYOUT ─────────────────────────────────── */
+  .app { display: flex; min-height: 100vh; }
+
+  /* ─── SIDEBAR ────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 100;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+  }
+  .sidebar-logo .logo-mark {
+    width: 30px; height: 30px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff; letter-spacing: -0.5px;
+    flex-shrink: 0;
+  }
+  .sidebar-logo .logo-name {
+    font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.3px;
+  }
+  .sidebar-logo .collapse-btn {
+    margin-left: auto;
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.06);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--sidebar-text);
+    transition: background 0.2s;
+  }
+  .sidebar-logo .collapse-btn:hover { background: rgba(255,255,255,0.1); }
+  .collapse-btn svg { width: 12px; height: 12px; }
+
+  .sidebar-nav { padding: 10px 0; flex: 1; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    color: var(--sidebar-text);
+    font-size: 13.5px;
+    font-weight: 450;
+    border-radius: 0;
+    transition: background 0.15s, color 0.15s;
+    position: relative;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--sidebar-hover); color: #c8cdd8; }
+  .nav-item.active {
+    background: var(--sidebar-active);
+    color: var(--sidebar-text-active);
+  }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 20px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+  .nav-icon { width: 17px; height: 17px; flex-shrink: 0; opacity: 0.85; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  /* ─── MAIN ───────────────────────────────────── */
+  .main {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── TOPBAR ─────────────────────────────────── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px 10px;
+  }
+  .topbar-title { font-size: 22px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; }
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+  .icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .icon-btn:hover { border-color: #c5c9d4; box-shadow: var(--shadow-sm); }
+  .icon-btn svg { width: 16px; height: 16px; }
+  .badge {
+    position: absolute; top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    background: var(--red);
+    border-radius: 50%;
+    font-size: 9px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--body-bg);
+  }
+
+  .avatar-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+  }
+  .avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-placeholder {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e6a, #e8457a);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .upgrade-btn {
+    height: 34px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--text-primary);
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.1px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .upgrade-btn:hover { background: var(--text-primary); color: #fff; }
+
+  /* ─── CONTENT ────────────────────────────────── */
+  .content {
+    padding: 6px 32px 40px;
+    flex: 1;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* ─── CARD ───────────────────────────────────── */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+  }
+
+  /* ─── BILLS CARD ─────────────────────────────── */
+  .bills-card { padding: 22px 24px 20px; }
+  .bills-header { margin-bottom: 16px; }
+  .bills-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+  .bills-subtitle { font-size: 12.5px; color: var(--text-muted); }
+
+  .bills-amounts {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+  .amount-group {}
+  .amount-label { font-size: 11.5px; font-weight: 500; color: var(--accent-blue); margin-bottom: 3px; letter-spacing: 0.1px; }
+  .amount-label.overdue { color: var(--red); }
+  .amount-value { font-size: 26px; font-weight: 700; letter-spacing: -1px; color: var(--text-primary); font-family: var(--font-mono); }
+  .amount-value.overdue { color: var(--red); }
+
+  /* ─── BAR CHART ──────────────────────────────── */
+  .chart-wrap { margin-bottom: 18px; }
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    height: 110px;
+    margin-bottom: 8px;
+  }
+  .bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+  .bar-val { font-size: 10.5px; font-weight: 500; color: var(--text-secondary); font-family: var(--font-mono); }
+  .bar { width: 100%; border-radius: 5px 5px 0 0; transition: opacity 0.2s; cursor: pointer; position: relative; min-height: 3px; }
+  .bar:hover { opacity: 0.85; }
+  .bar-label { font-size: 10px; font-weight: 500; color: var(--text-muted); text-align: center; letter-spacing: 0.3px; text-transform: uppercase; margin-top: 4px; }
+
+  .chart-divider { border: none; border-top: 1px solid var(--border-light); margin: 4px 0 10px; }
+
+  .bills-summary { display: flex; flex-direction: column; gap: 5px; margin-bottom: 18px; }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+  .summary-row span:last-child { font-weight: 500; color: var(--text-primary); font-family: var(--font-mono); }
+
+  .bills-actions { display: flex; gap: 10px; }
+  .btn-outline {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 12.5px;
+    font-weight: 550;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .btn-outline:hover { border-color: #b0b5c0; box-shadow: var(--shadow-sm); }
+  .btn-outline svg { width: 12px; height: 12px; }
+  .btn-solid {
+    height: 34px;
+    padding: 0 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--text-primary);
+    color: #fff;
+    font-family: var(--font);
+    font-size: 12.5px;
+    font-weight: 550;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-solid:hover { background: #2e3547; }
+
+  /* ─── DEADLINES CARD ─────────────────────────── */
+  .deadlines-card { padding: 22px 20px; }
+  .deadlines-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+  .deadlines-icon {
+    width: 52px; height: 52px;
+    background: var(--green-light);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 10px;
+  }
+  .deadlines-icon svg { width: 26px; height: 26px; color: var(--accent); }
+  .deadlines-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+  .deadline-list { display: flex; flex-direction: column; gap: 0; position: relative; }
+  .deadline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    position: relative;
+  }
+  .deadline-item + .deadline-item { border-top: 1px solid var(--border-light); }
+
+  .deadline-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 16px;
+  }
+  .dot-green { background: var(--accent); box-shadow: 0 0 0 3px rgba(45,155,138,0.15); }
+  .dot-amber { background: var(--amber); box-shadow: 0 0 0 3px rgba(212,135,14,0.15); }
+  .dot-gray { background: #c5c9d4; }
+
+  .deadline-date-box {
+    background: var(--amber-light);
+    border-radius: 8px;
+    padding: 4px 8px;
+    text-align: center;
+    min-width: 38px;
+    flex-shrink: 0;
+  }
+  .deadline-date-box.green { background: var(--green-light); }
+  .deadline-date-box.gray { background: var(--border-light); }
+  .deadline-date-box .month { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--amber); }
+  .deadline-date-box.green .month { color: var(--accent); }
+  .deadline-date-box.gray .month { color: var(--text-muted); }
+  .deadline-date-box .day { font-size: 17px; font-weight: 800; line-height: 1.1; color: var(--text-primary); }
+
+  .deadline-info { flex: 1; min-width: 0; }
+  .deadline-name { font-size: 13px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 5px; }
+  .deadline-name svg { width: 13px; height: 13px; color: var(--text-muted); flex-shrink: 0; }
+  .deadline-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; line-height: 1.4; }
+
+  /* ─── QUICK ACTIONS ──────────────────────────── */
+  .section-title {
+    font-size: 15px; font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px;
+    background: var(--accent);
+    border-radius: 50%;
+    font-size: 10.5px; font-weight: 700; color: #fff;
+  }
+
+  .qa-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .qa-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .qa-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+  .qa-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px;
+  }
+  .qa-icon.blue { background: var(--accent-blue-light); color: var(--accent-blue); }
+  .qa-icon.teal { background: var(--green-light); color: var(--accent); }
+  .qa-icon.indigo { background: #eeebff; color: #6c5ce7; }
+  .qa-icon.orange { background: #fff4e8; color: #e07b2a; }
+  .qa-icon.green { background: var(--green-light); color: var(--accent); }
+  .qa-icon.purple { background: #f3eeff; color: #8b5cf6; }
+  .qa-icon svg { width: 20px; height: 20px; }
+
+  .qa-title { font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+  .qa-desc { font-size: 11.5px; color: var(--text-muted); line-height: 1.45; flex: 1; }
+
+  .qa-btn {
+    margin-top: 12px;
+    height: 34px;
+    border-radius: 7px;
+    border: none;
+    font-family: var(--font);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    width: 100%;
+  }
+  .qa-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .qa-btn:active { transform: translateY(0); }
+  .qa-btn.teal-btn { background: var(--accent); color: #fff; }
+  .qa-btn.blue-btn { background: var(--accent-blue); color: #fff; }
+  .qa-btn.outline-teal {
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+  }
+
+  /* ─── SCROLLBAR ──────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 10px; }
+
+  /* ─── RESPONSIVE ─────────────────────────────── */
+  @media (max-width: 1100px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .qa-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 820px) {
+    :root { --sidebar-width: 60px; }
+    .nav-item span { display: none; }
+    .sidebar-logo .logo-name { display: none; }
+    .sidebar-logo .collapse-btn { display: none; }
+    .topbar, .content { padding-left: 20px; padding-right: 20px; }
+  }
+  @media (max-width: 600px) {
+    :root { --sidebar-width: 0px; }
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .qa-grid { grid-template-columns: 1fr; }
+    .bills-amounts { flex-direction: column; gap: 12px; }
+    .topbar-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">N</div>
+      <span class="logo-name">Numeris</span>
+      <button class="collapse-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M15 6l-6 6 6 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <div class="nav-item active">
+        <!-- Dashboard icon -->
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span>Dashboard</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>Clients</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <span>Invoices</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+        <span>Invoices</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Exports</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+        <span>Payments</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+        </svg>
+        <span>Projects</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span>Time Tracking</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        <span>Accounting</span>
+      </div>
+
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        <span>Reports</span>
+      </div>
+
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <h1 class="topbar-title">Welcome back, Hollie!</h1>
+      <div class="topbar-actions">
+        <div class="avatar-placeholder">H</div>
+
+        <button class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+
+        <button class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <div class="badge">7</div>
+        </button>
+
+        <button class="upgrade-btn">UPGRADE PLAN</button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- Top grid: Bills + Deadlines -->
+      <div class="content-grid" style="margin-bottom:20px;">
+
+        <!-- Bills Card -->
+        <div class="card bills-card">
+          <div class="bills-header">
+            <div class="bills-title">Bills to Pay</div>
+            <div class="bills-subtitle">Total outstanding (12 awaiting, 11 overdue)</div>
+          </div>
+
+          <div class="bills-amounts">
+            <div class="amount-group">
+              <div class="amount-label">Awaiting Payment (12 bills)</div>
+              <div class="amount-value">$7,429.21</div>
+            </div>
+            <div class="amount-group" style="text-align:right;">
+              <div class="amount-label overdue">Overdue (11 bills)</div>
+              <div class="amount-value overdue">$3,187.21</div>
+            </div>
+          </div>
+
+          <!-- Bar Chart -->
+          <div class="chart-wrap">
+            <div class="chart-bars">
+              <!-- older -->
+              <div class="bar-col">
+                <span class="bar-val">7,429.21</span>
+                <div class="bar" style="height:100%;background:#b0b8c8;" title="Older: $7,429.21"></div>
+              </div>
+              <!-- this week -->
+              <div class="bar-col">
+                <span class="bar-val">1,329.23</span>
+                <div class="bar" style="height:18%;background:#4a90d9;" title="This Week: $1,329.23"></div>
+              </div>
+              <!-- Apr 5-11 -->
+              <div class="bar-col">
+                <span class="bar-val">387.21</span>
+                <div class="bar" style="height:5%;background:#93c5e8;" title="Apr 5-11: $387.21"></div>
+              </div>
+              <!-- Apr 12-18 -->
+              <div class="bar-col">
+                <span class="bar-val">1,597.23</span>
+                <div class="bar" style="height:22%;background:#d4870e;" title="Apr 12-18: $1,597.23"></div>
+              </div>
+              <!-- From Apr 19 -->
+              <div class="bar-col">
+                <span class="bar-val">0.00</span>
+                <div class="bar" style="height:0.5%;background:#e8eaef;min-height:3px;" title="From Apr 19: $0.00"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;">
+              <div style="flex:1;text-align:center;" class="bar-label">Older</div>
+              <div style="flex:1;text-align:center;" class="bar-label">This Week</div>
+              <div style="flex:1;text-align:center;" class="bar-label">Apr 5 – 11</div>
+              <div style="flex:1;text-align:center;" class="bar-label">Apr 12 – 18</div>
+              <div style="flex:1;text-align:center;" class="bar-label">From Apr 19</div>
+            </div>
+          </div>
+
+          <hr class="chart-divider" />
+
+          <div class="bills-summary">
+            <div class="summary-row"><span>0 drafts</span><span>0.00</span></div>
+            <div class="summary-row"><span>0 awaiting approval</span><span>0.00</span></div>
+          </div>
+
+          <div class="bills-actions">
+            <button class="btn-outline">
+              Add bills
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <button class="btn-solid">View all bills</button>
+          </div>
+        </div>
+
+        <!-- Deadlines Card -->
+        <div class="card deadlines-card">
+          <div class="deadlines-header">
+            <div class="deadlines-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+                <path d="M17 14l-2 2-1-1"/>
+              </svg>
+            </div>
+            <div class="deadlines-title">Upcoming Deadlines</div>
+          </div>
+
+          <div class="deadline-list">
+
+            <div class="deadline-item">
+              <div class="dot-green deadline-dot"></div>
+              <div class="deadline-date-box green">
+                <div class="month">JAN</div>
+                <div class="day">12</div>
+              </div>
+              <div class="deadline-info">
+                <div class="deadline-name">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  GST Return
+                </div>
+                <div class="deadline-sub">Oct 01 2025 – Due Jan 31</div>
+              </div>
+            </div>
+
+            <div class="deadline-item">
+              <div class="dot-amber deadline-dot"></div>
+              <div class="deadline-date-box">
+                <div class="month">MAY</div>
+                <div class="day">4</div>
+              </div>
+              <div class="deadline-info">
+                <div class="deadline-name">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  GST Return
+                </div>
+                <div class="deadline-sub">Oct 01 2025 – Due Jan 15<br/>Due By May 4</div>
+              </div>
+            </div>
+
+            <div class="deadline-item">
+              <div class="dot-gray deadline-dot"></div>
+              <div class="deadline-date-box gray">
+                <div class="month">MAY</div>
+                <div class="day">5</div>
+              </div>
+              <div class="deadline-info">
+                <div class="deadline-name">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  GST Return
+                </div>
+                <div class="deadline-sub">Oct 01 2025 – Due Jan 20<br/>Due By May 5</div>
+              </div>
+            </div>
+
+            <div class="deadline-item">
+              <div class="dot-gray deadline-dot"></div>
+              <div class="deadline-date-box gray" style="background:#f0f2f5;">
+                <div class="month" style="color:#9ca3af;">OCT</div>
+                <div class="day">26</div>
+              </div>
+              <div class="deadline-info">
+                <div class="deadline-name">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Provisional Tax
+                </div>
+                <div class="deadline-sub">Oct 26 2026 – Due Oct 26</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /content-grid -->
+
+      <!-- Quick Actions -->
+      <div class="section-title">
+        Quick Actions
+        <span class="section-count">6</span>
+      </div>
+
+      <div class="qa-grid">
+
+        <div class="qa-card">
+          <div class="qa-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="qa-title">Create Invoice</div>
+          <div class="qa-desc">Generate detailed invoices for your clients and get paid faster.</div>
+          <button class="qa-btn teal-btn">New Invoice</button>
+        </div>
+
+        <div class="qa-card">
+          <div class="qa-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
+          <div class="qa-title">Log Expense</div>
+          <div class="qa-desc">Record business spending, capture receipts, and categorize costs.</div>
+          <button class="qa-btn teal-btn">Log Expense</button>
+        </div>
+
+        <div class="qa-card">
+          <div class="qa-icon indigo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="7.5 4.21 12 6.81 16.5 4.21"/><polyline points="7.5 19.79 7.5 14.6 3 12"/>
+              <polyline points="21 12 16.5 14.6 16.5 19.79"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <div class="qa-title">Sync Bank Feed</div>
+          <div class="qa-desc">Safely connect your bank accounts for automatic reconciliation.</div>
+          <button class="qa-btn blue-btn">Connect Now</button>
+        </div>
+
+        <div class="qa-card">
+          <div class="qa-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+              <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+            </svg>
+          </div>
+          <div class="qa-title">Expense Analysis</div>
+          <div class="qa-desc">Get a clear visual breakdown of all your expense categories.</div>
+          <button class="qa-btn outline-teal">Analyze Breakdown</button>
+        </div>
+
+        <div class="qa-card">
+          <div class="qa-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <div class="qa-title">Analyze Revenue</div>
+          <div class="qa-desc">Identify your most valuable clients and track revenue sources.</div>
+          <button class="qa-btn outline-teal">Track Revenue</button>
+        </div>
+
+        <div class="qa-card">
+          <div class="qa-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="qa-title">Compare Clients</div>
+          <div class="qa-desc">Compare key metrics across your different client accounts.</div>
+          <button class="qa-btn outline-teal">Compare Clients</button>
+        </div>
+
+      </div><!-- /qa-grid -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+</body>
+</html>
